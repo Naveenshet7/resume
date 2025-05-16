@@ -8,40 +8,53 @@ export const generatePdf = async (
 ): Promise<void> => {
   try {
     if (resumeContainerRef.current) {
-      const canvas = await html2canvas(resumeContainerRef.current, {
-        scale: 2,
+      // Clone the resume container
+      const clone = resumeContainerRef.current.cloneNode(true) as HTMLElement;
+      
+      // Reset any scaling transforms
+      clone.style.transform = 'none';
+      clone.style.width = '210mm';
+      clone.style.height = '297mm';
+      
+      // Create a temporary container
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      const canvas = await html2canvas(clone, {
+        scale: 2, // Higher scale for better quality
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
-        windowWidth: 794, // A4 width in pixels at 96 DPI
-        windowHeight: 1123, // A4 height in pixels at 96 DPI
-        onclone: (clonedDoc) => {
-          const element = clonedDoc.querySelector('[ref="resumeContainer"]');
-          if (element) {
-            element.style.transform = 'none';
-            element.style.width = '210mm';
-            element.style.height = '297mm';
-          }
-        }
+        width: 2480, // A4 width at 300 DPI
+        height: 3508, // A4 height at 300 DPI
+        foreignObjectRendering: true,
+        removeContainer: true,
       });
 
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = 297; // A4 height in mm
+      // Remove the temporary container
+      document.body.removeChild(container);
 
+      // Create PDF with proper dimensions
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        compress: true
       });
 
+      // Add the image to PDF with proper dimensions
       pdf.addImage(
-        canvas.toDataURL('image/png'),
-        'PNG',
+        canvas.toDataURL('image/jpeg', 1.0),
+        'JPEG',
         0,
         0,
-        imgWidth,
-        imgHeight,
-        '',
+        210, // A4 width in mm
+        297, // A4 height in mm
+        undefined,
         'FAST'
       );
 
