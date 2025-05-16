@@ -8,8 +8,6 @@ import {
   formatUrl
 } from '../utils/helpers';
 import { Phone, Mail, Linkedin, Github, Globe, Award, Briefcase, GraduationCap, Wrench, FolderGit2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 interface ResumePreviewProps {
   className?: string;
@@ -22,7 +20,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     const { personalInfo, skills, education, languages, projects, experience, certifications } = resumeData;
     
     const colorClass = themeOptions.colorTheme === 'custom' && themeOptions.customColor
-      ? '' // We'll use inline style for custom colors
+      ? '' 
       : getColorClass(themeOptions.colorTheme, isDarkMode);
     
     const fontClass = getFontClass(themeOptions.fontFamily);
@@ -32,189 +30,135 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
     const customStyle = themeOptions.colorTheme === 'custom' && themeOptions.customColor
       ? { '--custom-color': themeOptions.customColor } as React.CSSProperties
       : {};
-    
-    const headerColor = themeOptions.colorTheme === 'custom' && themeOptions.customColor
-      ? { backgroundColor: themeOptions.customColor, color: 'white' }
-      : {};
-    
-    const sectionHeaderColor = themeOptions.colorTheme === 'custom' && themeOptions.customColor
-      ? { color: themeOptions.customColor }
-      : {};
 
-    // Apply section spacing
-    const sectionSpacing = themeOptions.sectionSpacing || 16;
-    console.log('Applying sectionSpacing:', sectionSpacing);
-
-    // Apply new theme options
-    const lineHeight = themeOptions.lineHeight || 1.5;
-    const marginHorizontal = themeOptions.marginHorizontal || 20;
-    const marginVertical = themeOptions.marginVertical || 20;
-    const entrySpacing = themeOptions.entrySpacing || 10;
+    // A4 size in pixels (assuming 96 DPI)
+    const a4Width = '210mm';
+    const a4Height = '297mm';
 
     return (
       <div 
         ref={ref}
-        className={`bg-white shadow-lg ${borderClass} ${className}`}
+        className={`bg-white dark:bg-white ${borderClass} ${className} mx-auto overflow-hidden`}
         style={{
           ...customStyle,
-          width: '210mm', // Set width to A4 size
-          height: '297mm', // Set height to A4 size
-          marginLeft: `${marginHorizontal}px`,
-          marginRight: `${marginHorizontal}px`,
-          marginTop: `${marginVertical}px`,
-          marginBottom: `${marginVertical}px`,
+          width: a4Width,
+          height: a4Height,
+          maxWidth: '100%',
+          maxHeight: '100%',
+          boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+          transform: 'scale(var(--scale, 1))',
+          transformOrigin: 'top center',
         }}
       >
         {/* Header */}
-        <div 
-          className={`p-6 ${
-            themeOptions.layoutStyle === 'Modern' ? borderClass : ''
-          }`}
-        >
-          <h1 className={`text-2xl font-bold ${fontClass}`} style={{ color: 'black' }}>
+        <div className="p-6 border-b border-gray-200">
+          <h1 className={`text-2xl font-bold ${fontClass} text-gray-900`}>
             {personalInfo.fullName || 'Your Name'}
           </h1>
           
           {/* Contact Information */}
-          <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2 text-sm" style={{ color: 'black' }}>
+          <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-700">
             {personalInfo.email && (
-              <div className="flex items-center">
-                <Mail size={12} className="mr-1 text-gray-600" />
+              <div className="flex items-center gap-1">
+                <Mail size={14} />
                 <span>{personalInfo.email}</span>
               </div>
             )}
             {personalInfo.phone && (
-              <div className="flex items-center">
-                <Phone size={12} className="mr-1 text-gray-600" />
+              <div className="flex items-center gap-1">
+                <Phone size={14} />
                 <span>{personalInfo.phone}</span>
               </div>
             )}
             {personalInfo.linkedin && (
-              <div className="flex items-center">
-                <Linkedin size={12} className="mr-1 text-gray-600" />
-                <a 
-                  href={formatUrl(personalInfo.linkedin)} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
+              <div className="flex items-center gap-1">
+                <Linkedin size={14} />
+                <a href={formatUrl(personalInfo.linkedin)} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
                   {personalInfo.linkedin.replace(/^https?:\/\/(www\.)?/, '')}
                 </a>
               </div>
             )}
             {personalInfo.github && (
-              <div className="flex items-center">
-                <Github size={12} className="mr-1 text-gray-600" />
-                <a 
-                  href={formatUrl(personalInfo.github)} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
+              <div className="flex items-center gap-1">
+                <Github size={14} />
+                <a href={formatUrl(personalInfo.github)} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
                   {personalInfo.github.replace(/^https?:\/\/(www\.)?/, '')}
                 </a>
               </div>
             )}
           </div>
         </div>
-        {(personalInfo.email || personalInfo.phone || personalInfo.linkedin || personalInfo.github) && (
-          <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '93%' }} />
-        )}
-        
+
         {/* Body */}
-        <div className={`p-6 ${fontClass} ${fontSizeClass}`} style={{ marginBottom: `${sectionSpacing}px`, lineHeight }}>
+        <div className={`p-6 ${fontClass} ${fontSizeClass} text-gray-800`}>
           {/* Summary */}
           {personalInfo.summary && (
-            <div className="mb-6" style={{ marginBottom: `${entrySpacing}px` }}>
-              <p>{personalInfo.summary}</p>
+            <div className="mb-6">
+              <p className="leading-relaxed">{personalInfo.summary}</p>
             </div>
           )}
-          {personalInfo.summary && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
-          )}
-          
+
           {/* Skills */}
           {skills.some(skill => skill.name) && (
-            <div className="mb-6" style={{ marginBottom: `${entrySpacing}px` }}>
-              <h2 
-                className={`text-lg font-semibold mb-2 flex items-center ${
-                  colorClass.replace('bg-', 'text-')
-                }`}
-                style={sectionHeaderColor}
-              >
-                <Wrench size={14} className="mr-1 text-gray-600" />
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-900">
+                <Wrench size={16} />
                 Skills
               </h2>
               <div className="flex flex-wrap gap-2">
                 {skills
                   .filter(skill => skill.name)
                   .map((skill, index, array) => (
-                    <span key={skill.id} className="text-black">
+                    <span key={skill.id}>
                       {skill.name}{index !== array.length - 1 ? ', ' : ''}
                     </span>
                   ))}
               </div>
             </div>
           )}
-          {skills.some(skill => skill.name) && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
-          )}
-          
+
           {/* Experience */}
           {experience.some(exp => exp.company && exp.role) && (
-            <div className="mb-6" style={{ marginBottom: `${sectionSpacing}px` }}>
-              <h2 
-                className={`text-lg font-semibold mb-2 flex items-center ${
-                  colorClass.replace('bg-', 'text-')
-                }`}
-                style={sectionHeaderColor}
-              >
-                <Briefcase size={14} className="mr-1 text-gray-600" />
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-900">
+                <Briefcase size={16} />
                 Work Experience
               </h2>
               <div className="space-y-4">
                 {experience
                   .filter(exp => exp.company && exp.role)
                   .map((exp) => (
-                    <div key={exp.id} className="border-l-2 pl-4 py-1 border-gray-300">
-                      <div className="font-medium">{exp.role}</div>
-                      <div className="flex justify-between">
+                    <div key={exp.id} className="border-l-2 pl-4 py-2 border-gray-300">
+                      <div className="font-medium text-gray-900">{exp.role}</div>
+                      <div className="flex justify-between text-gray-700">
                         <span>{exp.company}</span>
-                        <span className="text-sm text-gray-600">
-                          {exp.startDate} - {exp.endDate || 'Present'}
+                        <span className="text-sm">
+                          {exp.startDate} - {exp.isCurrentRole ? 'Present' : exp.endDate}
                         </span>
                       </div>
-                      <p className="mt-1 text-sm">{exp.description}</p>
+                      <p className="mt-2 text-sm text-gray-600">{exp.description}</p>
                     </div>
                   ))}
               </div>
             </div>
           )}
-          {experience.some(exp => exp.company && exp.role) && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
-          )}
-          
+
           {/* Education */}
           {education.some(edu => edu.institution && edu.degree) && (
-            <div className="mb-6" style={{ marginBottom: `${sectionSpacing}px` }}>
-              <h2 
-                className={`text-lg font-semibold mb-2 flex items-center ${
-                  colorClass.replace('bg-', 'text-')
-                }`}
-                style={sectionHeaderColor}
-              >
-                <GraduationCap size={14} className="mr-1 text-gray-600" />
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-900">
+                <GraduationCap size={16} />
                 Education
               </h2>
               <div className="space-y-4">
                 {education
                   .filter(edu => edu.institution && edu.degree)
                   .map((edu) => (
-                    <div key={edu.id} className="border-l-2 pl-4 py-1 border-gray-300">
-                      <div className="font-medium">{edu.degree}</div>
-                      <div className="flex justify-between">
+                    <div key={edu.id} className="border-l-2 pl-4 py-2 border-gray-300">
+                      <div className="font-medium text-gray-900">{edu.degree}</div>
+                      <div className="flex justify-between text-gray-700">
                         <span>{edu.institution}</span>
-                        <span className="text-sm text-gray-600">{edu.year}</span>
+                        <span className="text-sm">{edu.year}</span>
                       </div>
                       {edu.grade && (
                         <p className="mt-1 text-sm text-gray-600">Grade: {edu.grade}</p>
@@ -224,119 +168,92 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
               </div>
             </div>
           )}
-          {education.some(edu => edu.institution && edu.degree) && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
-          )}
-          
-          {/* Languages */}
-          {languages.some(lang => lang.name) && (
-            <div className="mb-6" style={{ marginBottom: `${sectionSpacing}px` }}>
-              <h2 
-                className={`text-lg font-semibold mb-2 flex items-center ${
-                  colorClass.replace('bg-', 'text-')
-                }`}
-                style={sectionHeaderColor}
-              >
-                <Globe size={14} className="mr-1 text-gray-600" />
-                Languages
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {languages
-                  .filter(lang => lang.name)
-                  .map((lang, index, array) => (
-                    <span key={lang.id} className="text-black">
-                      {lang.name}{index !== array.length - 1 ? ', ' : ''}
-                    </span>
-                  ))}
-              </div>
-            </div>
-          )}
-          {languages.some(lang => lang.name) && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
-          )}
-          
+
           {/* Projects */}
           {projects.some(proj => proj.title) && (
-            <div className="mb-6" style={{ marginBottom: `${sectionSpacing}px` }}>
-              <h2 
-                className={`text-lg font-semibold mb-2 flex items-center ${
-                  colorClass.replace('bg-', 'text-')
-                }`}
-                style={sectionHeaderColor}
-              >
-                <FolderGit2 size={14} className="mr-1 text-gray-600" />
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-900">
+                <FolderGit2 size={16} />
                 Projects
               </h2>
               <div className="space-y-4">
                 {projects
                   .filter(proj => proj.title)
                   .map((proj) => (
-                    <div key={proj.id} className="border-l-2 pl-4 py-1 border-gray-300">
-                      <div className="font-medium">
+                    <div key={proj.id} className="border-l-2 pl-4 py-2 border-gray-300">
+                      <div className="font-medium text-gray-900">
                         {proj.title}
                         {proj.link && (
                           <a 
                             href={formatUrl(proj.link)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-sm text-blue-500 hover:underline"
+                            className="ml-2 text-sm text-blue-600 hover:underline"
                           >
                             View Project
                           </a>
                         )}
                       </div>
                       <div className="text-sm text-gray-600">{proj.technologies}</div>
-                      <p className="mt-1 text-sm">{proj.description}</p>
+                      <p className="mt-2 text-sm text-gray-700">{proj.description}</p>
                     </div>
                   ))}
               </div>
             </div>
           )}
-          {projects.some(proj => proj.title) && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
+
+          {/* Languages */}
+          {languages.some(lang => lang.name) && (
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-900">
+                <Globe size={16} />
+                Languages
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {languages
+                  .filter(lang => lang.name)
+                  .map((lang, index, array) => (
+                    <span key={lang.id} className="text-gray-700">
+                      {lang.name}{index !== array.length - 1 ? ', ' : ''}
+                    </span>
+                  ))}
+              </div>
+            </div>
           )}
-          
+
           {/* Certifications */}
           {certifications.some(cert => cert.name) && (
-            <div className="mb-6" style={{ marginBottom: `${sectionSpacing}px` }}>
-              <h2 
-                className={`text-lg font-semibold mb-2 flex items-center ${
-                  colorClass.replace('bg-', 'text-')
-                }`}
-                style={sectionHeaderColor}
-              >
-                <Award size={14} className="mr-1 text-gray-600" />
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-gray-900">
+                <Award size={16} />
                 Certifications
               </h2>
               <div className="space-y-4">
                 {certifications
                   .filter(cert => cert.name)
                   .map((cert) => (
-                    <div key={cert.id} className="border-l-2 pl-4 py-1 border-gray-300">
-                      <div className="font-medium">
+                    <div key={cert.id} className="border-l-2 pl-4 py-2 border-gray-300">
+                      <div className="font-medium text-gray-900">
                         {cert.name}
                         {cert.link && (
                           <a
                             href={formatUrl(cert.link)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="ml-2 text-sm text-blue-500 hover:underline"
+                            className="ml-2 text-sm text-blue-600 hover:underline"
                           >
                             Verify
                           </a>
                         )}
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between text-gray-700">
                         <span>{cert.issuer}</span>
-                        <span className="text-sm text-gray-600">{cert.date}</span>
+                        <span className="text-sm">{cert.date}</span>
                       </div>
                     </div>
                   ))}
               </div>
             </div>
-          )}
-          {certifications.some(cert => cert.name) && (
-            <hr className="my-4 mx-auto" style={{ borderColor: 'black', borderWidth: '1px', borderStyle: 'solid', width: '98%' }} />
           )}
         </div>
       </div>
@@ -344,30 +261,5 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
   }
 );
 
-ResumePreview.displayName = 'ResumePreview';  
-
-export default ResumePreview;  
-
-export const generatePdf = async (
-  resumeContainerRef: React.RefObject<HTMLDivElement>,
-  fileName: string = 'resume.pdf'
-): Promise<void> => {
-  try {
-    if (resumeContainerRef.current) {
-      const canvas = await html2canvas(resumeContainerRef.current);
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate dimensions
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save(fileName);
-    }
-  } catch (error) {
-    console.error('Failed to generate PDF:', error);
-    throw error;
-  }
-};  
+ResumePreview.displayName = 'ResumePreview';
+export default ResumePreview;

@@ -9,28 +9,42 @@ export const generatePdf = async (
   try {
     if (resumeContainerRef.current) {
       const canvas = await html2canvas(resumeContainerRef.current, {
-        scale: 2, // Increase scale for better quality
-        useCORS: true, // Enable CORS to handle external resources
-        logging: true, // Enable logging for debugging
-        backgroundColor: null, // Ensure transparent background
-        onclone: (document) => {
-          // Adjust icon size in the cloned document
-          const icons = document.querySelectorAll('svg');
-          icons.forEach(icon => {
-            icon.setAttribute('width', '12'); // Set icon width
-            icon.setAttribute('height', '12'); // Set icon height
-          });
-        },
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: 794, // A4 width in pixels at 96 DPI
+        windowHeight: 1123, // A4 height in pixels at 96 DPI
+        onclone: (clonedDoc) => {
+          const element = clonedDoc.querySelector('[ref="resumeContainer"]');
+          if (element) {
+            element.style.transform = 'none';
+            element.style.width = '210mm';
+            element.style.height = '297mm';
+          }
+        }
       });
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate dimensions for A4 page
+
       const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      const imgHeight = 297; // A4 height in mm
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      pdf.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        0,
+        0,
+        imgWidth,
+        imgHeight,
+        '',
+        'FAST'
+      );
+
       pdf.save(fileName);
     }
   } catch (error) {
@@ -45,10 +59,22 @@ export const generateDoc = async (
 ): Promise<void> => {
   try {
     if (resumeContainerRef.current) {
-      // Create a new Document
       const doc = new Document({
         sections: [{
-          properties: {},
+          properties: {
+            page: {
+              size: {
+                width: 11906,  // A4 width in twips
+                height: 16838, // A4 height in twips
+              },
+              margin: {
+                top: 1440,    // 1 inch
+                right: 1440,
+                bottom: 1440,
+                left: 1440,
+              },
+            },
+          },
           children: [
             new Paragraph({
               children: [
@@ -62,7 +88,6 @@ export const generateDoc = async (
         }],
       });
 
-      // Generate and save the document
       const blob = await Packer.toBlob(doc);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -77,4 +102,4 @@ export const generateDoc = async (
     console.error('Failed to generate DOC:', error);
     throw error;
   }
-}; 
+};

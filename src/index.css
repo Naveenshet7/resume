@@ -1,3 +1,77 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply antialiased;
+}
+
+/* Dark mode styles */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  @apply bg-gray-900 text-white;
+}
+
+/* A4 page preview container */
+.resume-preview-container {
+  @apply relative mx-auto overflow-hidden bg-white shadow-lg;
+  width: 210mm;
+  height: 297mm;
+}
+
+/* Responsive scaling for different screen sizes */
+@media screen and (max-width: 1280px) {
+  .resume-preview-container {
+    --scale: 0.9;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .resume-preview-container {
+    --scale: 0.8;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .resume-preview-container {
+    --scale: 0.7;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .resume-preview-container {
+    --scale: 0.6;
+  }
+}
+
+/* Smooth transitions */
+.transition-transform {
+  transition: transform 0.3s ease-in-out;
+}
+
+.transition-opacity {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Print styles */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .resume-preview-container {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+    transform: none !important;
+  }
+}
